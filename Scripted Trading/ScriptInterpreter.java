@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 /***
  * @author YuWu
- * last update:2015/4/9 23:09
+ * last update:2015/4/12 12:55
  */
 
 public class ScriptInterpreter {
@@ -20,8 +20,13 @@ public class ScriptInterpreter {
 		return result;
 	}
 	
-	public static String printFormat(String src){
-		return "";
+	public static String printFormat(String src){  //modify format of space
+		String result=src;
+		while(result.indexOf("  ")>=0){
+			int uselessSpace=result.indexOf("  ");
+			result = result.substring(0,uselessSpace)+result.substring(uselessSpace+1);
+		}
+		return result;
 	}
 	
 	public static boolean containsValidInfo(String src){
@@ -55,11 +60,17 @@ public class ScriptInterpreter {
 		
 		int keyPosition=originalLine.indexOf(key);
 		int startIndex=keyPosition+key.length(); //need modify
-		int endIndex=startIndex+5;               //need modify
+
 		if (originalLine.contains("price")){ 
-			result = originalLine.substring(startIndex, endIndex);
-			} 
-		else if ((key.equals("increase")||key.equals("decrease"))&&originalLine.contains("%")){ result = originalLine.substring(startIndex, endIndex);} //m
+			int i=startIndex+1;
+			while(originalLine.charAt(i)>='0'&&originalLine.charAt(i)<='9'){
+			result = result+originalLine.charAt(i);
+			i++;
+			if(i>=originalLine.length()) break;
+			} }
+		else if ((key.equals("increase")||key.equals("decrease"))&&originalLine.contains("%")){ 
+			//result = originalLine.substring(startIndex, endIndex);
+			} //m
 		//else if (originalLine.contains("SensitiveWords"))
 		
 		if(!result.equals("")) return result;
@@ -82,10 +93,15 @@ public class ScriptInterpreter {
 		    reader = new BufferedReader(new FileReader(file));
 
 		    String line;
-		    while ((line = reader.readLine()) != (null)&&ScriptInterpreter.containsValidInfo(line)) {
-		    	System.out.print(ScriptInterpreter.lineNumberFormat(lineNumber++)+"-");
-		        System.out.println(line);
+		    while ((line = reader.readLine()) != (null)&&ScriptInterpreter.containsValidInfo(line)){
+		    	//System.out.print(ScriptInterpreter.lineNumberFormat(lineNumber++)+"-");
+		    	line=printFormat(line);
+		    	System.out.println(catchConditionForKeyWord(line,"price"));
+		    	
+		        //System.out.println(line);
 		    }
+		    	
+		    	
 
 		} catch (IOException e) {
 		    e.printStackTrace();
