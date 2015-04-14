@@ -4,12 +4,14 @@ import java.io.FileReader;
 import java.io.IOException;
 /***
  * @author YuWu
- * last update:2015/4/12 23:36
+ * last update:2015/4/14 00:50
  */
 
 
 public class BasicInterpreter {
+	private static boolean printScoop=true;
 	
+	//get value (positive)
 	private static int getValue(String src, int index){
 		String valueString="";
 
@@ -23,6 +25,28 @@ public class BasicInterpreter {
 			return Integer.valueOf(valueString);
 		}
 		return -999999;
+	}
+	public static int getValue(String src){
+		if (src.length()==0) return -999999;
+		String valueString="";
+		int index=0;
+		while(src.charAt(index)<'0'||src.charAt(index)>'9'){
+			index++;
+			if(index>=src.length()) {
+				return -999999;
+			}
+						
+		}
+		while(src.charAt(index)>='0'&&src.charAt(index)<='9'){
+			valueString = valueString+src.charAt(index);
+			index++;
+			if(src.charAt(index)==';'||src.charAt(index)==' ') break;    //first ;
+		}
+		if(!valueString.equals("")){
+			return Integer.valueOf(valueString);
+		}
+		return -999999;
+		
 	}
 	
 	private static String[] collectScoop(){ //single scoop
@@ -42,12 +66,24 @@ public class BasicInterpreter {
 			}else{ textIndex++; }
 			
 		}
-		int index=0;
-		while(scoop[index]!=null){
-			System.out.println(scoop[index]);
-			index++;
+		if(printScoop){
+			int index=0;
+			while(scoop[index]!=null){
+				System.out.println(scoop[index]);
+				index++;
+			}
+			printScoop=false;
 		}
-		return scoop;
+		
+		
+		int countLength=0;
+		for(int i=0;i<10;i++){ if (scoop[i]!=null) countLength++; }
+		String[] result=new String[countLength];
+		for(int i=0;i<result.length;i++){ result[i]=scoop[i]; }
+		
+
+		
+		return result;
 	}
 	
 	
@@ -114,14 +150,57 @@ public class BasicInterpreter {
 			System.out.println("INVALID INCREMENT");
 			return false;
 		}
-		//operate
-		String[] statement=new String[10];
+		//operate statement
+		String[] statement=new String[collectScoop().length];
 		statement= collectScoop();
+		if (condition.equals("<")){
+			for(int i=initial;i<conditionValue;i++){
+				isPRINT(statement,i);
+			}
+		}else if(condition.equals("<=")){
+			for(int i=initial;i<=conditionValue;i++){
+				isPRINT(statement,i);
+			}
+		}else{
+			System.out.println("OPERATE NEED IMPROMENT WITH INCREMENT!=3=");
+			return false;
+		}
 		
 		
-		System.out.println("YES!");
+		
+		
+		
+		
+		
+		
+		System.out.println("FINISH FOR");
 		return true;
 	}
+	
+	// PRINT 
+	public static boolean isPRINT(String[] scoop,int num){
+		int index=0;
+		boolean result=false;
+		while(scoop[index]!=null){
+			if (scoop[index].contains("print")) {
+				System.out.println(num);
+				result=true;
+			}
+			index++;
+			if(index>=scoop.length) break;
+		}
+		return result;		
+	}
+	
+	public static boolean isPRINT(String src,int num){
+		boolean result=false;
+		if (src.contains("print")) {
+			result=true;
+			if(num!=-999999) System.out.println(num);			
+		}
+		return result;
+	}
+	
 	
 	public static String[] basic(){
 		BufferedReader reader = null;
@@ -162,7 +241,8 @@ public class BasicInterpreter {
 		String[] text=new String[10];
 		text=basic();
 		for(int i=0;i<10&&text[i]!=null;i++){
-			isFOR(text[i]);
+			if(isFOR(text[i]));
+			else isPRINT(text[i],getValue(text[i]));
 			}
 		
 	}
