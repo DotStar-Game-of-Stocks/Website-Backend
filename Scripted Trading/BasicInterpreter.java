@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 /***
  * @author YuWu
- * last update:2015/4/14 00:50
+ * last update:2015/4/19 12:54
  */
 
 
@@ -85,8 +85,7 @@ public class BasicInterpreter {
 		
 		return result;
 	}
-	
-	
+		
 	
 	public static boolean isFOR(String src){  // integer ; single variable ;ignore space; recognize invalid thing; basic increment
 		if (!src.contains("for")) return false;
@@ -177,14 +176,83 @@ public class BasicInterpreter {
 		return true;
 	}
 	
+	public static boolean isWHILE(String src){    // default increment i++, default value i=0
+		if (!src.contains("while")) return false;
+		
+		//get condition
+		String condition="";
+		if     (src.contains(">=")) condition=">=";
+		else if(src.contains("<=")) condition="<=";
+		else if(src.contains(">"))  condition=">";
+		else if(src.contains("<"))  condition="<";
+		else {
+			System.out.println("INVALID CONDITION");
+			return false;
+		}
+		
+		//get initial value
+		int initial=findVal("i");
+		System.out.println("initial = "+initial);
+		
+		
+
+		// get condition value
+		int index;
+		if(condition.length()==1){
+			index=src.indexOf(condition)+1;			
+		}else{
+			index=src.indexOf(condition)+2;
+		}
+		int conditionValue=getValue(src,index);
+		if(conditionValue==-999999){
+			System.out.println("INVALID CONDITION VALUE");
+			return false;
+		}
+		else{
+			System.out.println("condition value = "+conditionValue);
+		}
+		
+		//operate statement
+		String[] statement=new String[collectScoop().length];
+		statement= collectScoop();
+		int i=initial;
+		if (condition.equals("<")){
+			while(i<conditionValue){
+				isPRINT(statement,i);
+				i++;
+			}
+		}else if(condition.equals("<=")){
+			while(i<=conditionValue){
+				isPRINT(statement,i);
+				i++;
+			}
+		}else{
+			System.out.println("OPERATE NEED IMPROMENT WITH INCREMENT!=3=");
+			return false;
+		}
+		
+		
+		
+		
+		System.out.println("FINISH WHILE");
+		return true;
+	}
+	
+	
+	
 	// PRINT 
 	public static boolean isPRINT(String[] scoop,int num){
 		int index=0;
 		boolean result=false;
 		while(scoop[index]!=null){
 			if (scoop[index].contains("print")) {
-				System.out.println(num);
+				
 				result=true;
+				if (scoop[index].substring(scoop[index].indexOf("print")+5).contains("i")){
+					if(num!=-999999) System.out.println(num);	
+				}else{
+					System.out.println(getValue(scoop[index]));
+					}
 			}
 			index++;
 			if(index>=scoop.length) break;
@@ -193,13 +261,111 @@ public class BasicInterpreter {
 	}
 	
 	public static boolean isPRINT(String src,int num){
+
 		boolean result=false;
 		if (src.contains("print")) {
 			result=true;
-			if(num!=-999999) System.out.println(num);			
+			if (src.contains("i")){ //further function: search variables' names
+				if(num!=-999999) System.out.println(num);	
+			}else{
+				System.out.println(getValue(src));
+				}
+					
 		}
 		return result;
 	}
+	
+
+	//just claim only now;
+	public static String[] variables=new String[0];
+	public static int[] varValue=new int[0];
+
+	private static void addVar(String newVar){                  // add new variable name, create position for its value
+		String[] result = new String[variables.length+1];
+		for(int i=0; i<variables.length;i++){
+			result[i]=variables[i];
+		}
+		result[variables.length]=newVar;
+		variables=new String[result.length];
+		variables=result;
+		
+		int[] newArray=new int[result.length];
+		for(int i=0;i<varValue.length;i++){
+			newArray[i]=varValue[i];
+		}
+		varValue=new int[newArray.length];
+		varValue=newArray;
+	}
+	private static void addVal(String varName,int newValue){
+		int index;
+		boolean found=false;
+		for(index=0;index<variables.length;index++){
+			if(variables[index].equals(varName)){
+				found=true;
+				break;
+			}
+		}
+		if (found) varValue[index]=newValue;
+	}
+	private static int findVal(String varName){
+		int index;
+		boolean found=false;
+		for(index=0;index<variables.length;index++){
+			if(variables[index].equals(varName)){
+				found=true;
+				break;
+			}
+		}
+		if (found) return varValue[index];
+		return 0; //return default value
+	}
+	
+	
+	
+	public static boolean findNewVar(String src){ //ignore case , single variable per line
+		boolean result=false;
+		src=src.toLowerCase();
+		if (src.length()==0) return result;
+		int position=src.indexOf("int");
+		if(position<0) return result;
+		
+		//get Variables' names
+		String varString="";
+		int index=position+3;
+		while(src.charAt(index)<'a'||src.charAt(index)>'z'){
+			index++;
+			if(index>=src.length()) {
+				return result;
+			}
+						
+		}
+		while(src.charAt(index)>='a'&&src.charAt(index)<='z'){
+			varString = varString+src.charAt(index);
+			index++;
+			if(src.charAt(index)==';'||src.charAt(index)==' ') break;    
+		}
+		if(varString.equals("")){
+			return result;
+		}
+		
+		// check exist
+		for(int i=0;)
+		
+		
+		addVar(varString);
+		
+		int value=getValue(src,src.indexOf("=")+1);
+		if(value!=-999999){
+			addVal(varString,value);
+		}
+		
+	
+		System.out.println(variables[variables.length-1]+": "+varValue[varValue.length-1]);
+				
+		result=true;
+		return result;
+	}
+	
 	
 	
 	public static String[] basic(){
@@ -207,7 +373,7 @@ public class BasicInterpreter {
 		String[] store=new String[10];
 		
 		try {
-		    File file = new File("basic.txt");  //HOW TO LOAD FILE FROM CERTAIN PATH AT DATABASE??
+		    File file = new File("whileTESTER.txt");  //HOW TO LOAD FILE FROM CERTAIN PATH AT DATABASE??
 		    reader = new BufferedReader(new FileReader(file));
 
 		    String line;
@@ -235,14 +401,15 @@ public class BasicInterpreter {
 		return store;
 	} 
 
-
 	
 	public static void main(String[] args){
 		String[] text=new String[10];
 		text=basic();
 		for(int i=0;i<10&&text[i]!=null;i++){
+			findNewVar(text[i]);
 			if(isFOR(text[i]));
-			else isPRINT(text[i],getValue(text[i]));
+			else if (isPRINT(text[i],getValue(text[i])));
+			else isWHILE(text[i]);
 			}
 		
 	}
