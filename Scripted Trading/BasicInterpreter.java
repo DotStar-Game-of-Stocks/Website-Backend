@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 /***
  * @author YuWu
- * last update:2015/4/19 12:54
+ * last update:2015/4/19 13:06
  */
 
 
@@ -349,7 +349,9 @@ public class BasicInterpreter {
 		}
 		
 		// check exist
-		for(int i=0;)
+		for(int i=0;i<variables.length;i++){
+			if(variables[i].equals(varString)) return false;
+		}
 		
 		
 		addVar(varString);
@@ -373,7 +375,7 @@ public class BasicInterpreter {
 		String[] store=new String[10];
 		
 		try {
-		    File file = new File("whileTESTER.txt");  //HOW TO LOAD FILE FROM CERTAIN PATH AT DATABASE??
+		    File file = new File("basic.txt");  //HOW TO LOAD FILE FROM CERTAIN PATH AT DATABASE??
 		    reader = new BufferedReader(new FileReader(file));
 
 		    String line;
