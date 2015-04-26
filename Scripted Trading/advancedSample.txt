@@ -1,0 +1,8 @@
+user: admin_123
+last upload: 20150425 23:29
+
+AAPL buy 200 @ $135.56
+AMZN sell 300 @ $357.36
+MSFT buy 50 @ $44.21
+SBUX buy 100 @ $53.22
+---END---
